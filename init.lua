@@ -6,11 +6,12 @@ end
 -- Bootstrap lazy.nvim
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not (vim.uv or vim.loop).fs_stat(lazypath) then
-  vim.fn.system({
+  local output = vim.fn.system({
     "git", "clone", "--filter=blob:none",
     "https://github.com/folke/lazy.nvim.git",
     "--branch=stable", lazypath,
   })
+  if vim.v.shell_error ~= 0 then error("Could not bootstrap lazy.nvim:\n" .. output) end
 end
 vim.opt.rtp:prepend(lazypath)
 
@@ -20,6 +21,7 @@ require("lazy").setup({
     -- LazyVim base distro (includes mason.nvim, nvim-lspconfig, trouble.nvim, gitsigns.nvim)
     {
       "LazyVim/LazyVim",
+      commit = "0fa4a847929fc6beae40a3063615a58115678c34",
       import = "lazyvim.plugins",
       opts = {
         colorscheme = "matugen",
@@ -31,6 +33,7 @@ require("lazy").setup({
     { import = "lazyvim.plugins.extras.coding.blink" },
     { import = "lazyvim.plugins.extras.editor.telescope" },
     { import = "lazyvim.plugins.extras.coding.luasnip" },
+    { import = "lazyvim.plugins.extras.coding.mini-surround" },
 
     -- Telescope: LazyVim's extra already sorts with fzf-native (fuzzy),
     -- but its default smart_case makes a query with capitals case-sensitive
@@ -43,8 +46,10 @@ require("lazy").setup({
         extensions = { fzf = { case_mode = "ignore_case" } },
       },
       config = function(_, opts)
-        require("telescope").setup(opts)
-        require("telescope").load_extension("fzf")
+        local telescope = require("telescope")
+        telescope.setup(opts)
+        -- The native sorter is optional on machines without build tools.
+        pcall(telescope.load_extension, "fzf")
       end,
     },
 
@@ -70,8 +75,8 @@ require("lazy").setup({
         size = 15,
       },
       keys = {
-        { [[<c-\>]], "<cmd>ToggleTerm<cr>", desc = "Toggle Terminal" },
-        { "<c-`>", "<cmd>ToggleTerm<cr>", desc = "Toggle Terminal" },
+        { [[<c-\>]], "<cmd>ToggleTerm<cr>", mode = { "n", "i" }, desc = "Toggle Terminal" },
+        { "<c-`>", "<cmd>ToggleTerm<cr>", mode = { "n", "i", "t" }, desc = "Toggle Terminal" },
       },
     },
     {
@@ -79,6 +84,22 @@ require("lazy").setup({
       commit = "73ea1e3c09c66dffec429848e48e1eda8ea00fca",
       cmd = "Pretest",
       opts = function() return require("cp") end,
+      config = function(_, opts)
+        require("pretest").setup(opts)
+        local ui = require("pretest.ui")
+        local run = ui.run
+        ui.run = function(indices, compile)
+          local session = ui.ensure_session()
+          if not session then return end
+          local problem = session.problem
+          if problem.interactive == true or (type(problem.input) == "table" and problem.input.type ~= "stdin")
+            or (type(problem.output) == "table" and problem.output.type ~= "stdout") then
+            vim.notify("Pretest only supports non-interactive stdin/stdout problems", vim.log.levels.WARN)
+            return
+          end
+          run(indices, compile)
+        end
+      end,
       keys = {
         { "<leader>cp", "<cmd>Pretest<cr>", desc = "CP Testcase Panel" },
         { "<leader>ct", "<cmd>Pretest run<cr>", desc = "CP Run All Samples" },
@@ -90,21 +111,15 @@ require("lazy").setup({
       opts = {
         snippets = { score_offset = 10 },
         sources = {
-          default = { "snippets", "lsp", "buffer", "path" },
-          min_keyword_length = 0,
           providers = {
             snippets = { min_keyword_length = 1, score_offset = 10 },
-            lsp = { min_keyword_length = 0 },
             buffer = { min_keyword_length = 3 },
           },
         },
         completion = {
-          trigger = { show_on_trigger_character = true, show_on_keyword = true, show_on_insert_on_trigger_character = true },
           list = { selection = { preselect = false, auto_insert = false } },
-          ghost_text = { enabled = false },
           documentation = { auto_show = false },
         },
-        signature = { enabled = false },
         keymap = {
           -- Tab accepts the selected item, or the first one if none is selected;
           -- inside a snippet it accepts only an explicitly picked item, else jumps
@@ -119,12 +134,15 @@ require("lazy").setup({
       },
     },
     {
+      "nvim-treesitter/nvim-treesitter",
+      opts = { ensure_installed = { "cpp" } },
+    },
+    {
       "neovim/nvim-lspconfig",
       opts = {
         inlay_hints = { enabled = false },
         servers = {
           clangd = {
-            root_markers = { ".git" },
             mason = false,
             cmd = {
               "clangd",
@@ -138,6 +156,7 @@ require("lazy").setup({
     },
   },
   defaults = { lazy = false, version = false },
+  rocks = { enabled = false },
 })
 
 require("cp")

@@ -2,14 +2,17 @@
 -- Palette lives in ~/.cache/nvim/matugen-colors.lua, written by matugen
 -- (template ~/.config/matugen/templates/nvim-colors.lua). Retheme by
 -- changing the wallpaper; running instances reload via rice-theme-reload.
-local ok, palette = pcall(dofile, vim.fn.stdpath("cache") .. "/matugen-colors.lua")
-if not ok or type(palette) ~= "table" then
-    -- No generated palette (fresh install before first matugen run): fall back.
-    vim.notify("matugen: palette not found, run `rice-wallpaper theme`", vim.log.levels.WARN)
+local ok, palette = pcall(dofile, vim.env.HOME .. "/.cache/nvim/matugen-colors.lua")
+if not ok or type(palette) ~= "table" or not palette.fg or not palette.bg then
+    vim.notify("matugen: palette unavailable; run `rice-wallpaper theme`", vim.log.levels.WARN)
+    -- :colorscheme is not reentrant; source the built-in fallback directly.
+    if vim.g.colors_name ~= "matugen" then vim.cmd.runtime("colors/habamax.vim") end
     return
 end
 
 local c = palette
+
+vim.cmd("highlight clear")
 
 vim.g.terminal_color_0  = c.bg_high
 vim.g.terminal_color_8  = c.outline
@@ -129,14 +132,6 @@ hi("DiagnosticVirtualTextError", { fg = c.error,    bg = c.bg_float })
 hi("DiagnosticVirtualTextWarn",  { fg = c.secondary, bg = c.bg_float })
 hi("DiagnosticVirtualTextInfo",  { fg = c.primary,  bg = c.bg_float })
 hi("DiagnosticVirtualTextHint",  { fg = c.tertiary, bg = c.bg_float })
-hi("DiagnosticFloatingError", { fg = c.error })
-hi("DiagnosticFloatingWarn",  { fg = c.secondary })
-hi("DiagnosticFloatingInfo",  { fg = c.primary })
-hi("DiagnosticFloatingHint",  { fg = c.tertiary })
-hi("DiagnosticSignError",     { fg = c.error })
-hi("DiagnosticSignWarn",      { fg = c.secondary })
-hi("DiagnosticSignInfo",      { fg = c.primary })
-hi("DiagnosticSignHint",      { fg = c.tertiary })
 
 -- LSP / semantic
 hi("LspReferenceText",  { bg = c.bg_high })

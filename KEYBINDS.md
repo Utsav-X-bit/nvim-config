@@ -9,12 +9,12 @@ Press and release `Space`, then press the subsequent keys.
 
 | Action | Neovim Keybind | VS Code Equivalent | Example |
 | :--- | :--- | :--- | :--- |
-| **Quick Open File** | `<C-p>` or `<leader><space>` | `Ctrl+P` | Press `Ctrl+P`, type `app.py`, hit `Enter`. |
+| **Quick Open File** | `<C-p>` (working directory) or `<leader><space>` (project root) | `Ctrl+P` | Press `Ctrl+P`, type `app.py`, hit `Enter`. |
 | **Toggle Sidebar / Tree** | `<C-b>` or `<C-n>` or `<leader>e` | `Ctrl+B` | Press `Ctrl+b` to hide or show your project files. |
 | **Toggle Terminal** | `<C-\>` or ``<C-`>`` | `Ctrl+`` | Press `Ctrl+\` to open a terminal drawer at the bottom. |
 | **Global Text Search** | `<leader>sg` | `Ctrl+Shift+F` | Press `Space s g`, type `import torch`, see all matches across files. |
-| **Command Palette** | `<leader>:` | `Ctrl+Shift+P` | Press `Space :` to run Neovim `:commands` with fuzzy autocomplete. |
-| **Save File** | `<leader>w` or `:w` | `Ctrl+S` | Press `Space w` to save changes. |
+| **Commands / History** | `<leader>sC` / `<leader>:` | `Ctrl+Shift+P` (commands) | Press `Space s C` to search commands or `Space :` for command history. |
+| **Save File** | `<C-s>` or `:w` | `Ctrl+S` | `Space w` opens window shortcuts; it does not save. |
 
 ---
 
@@ -31,14 +31,14 @@ Open or toggle with `<C-b>`, `<C-n>`, or `<leader>e`. When the tree sidebar is f
 | `r` | **Rename** file/folder | Press `r`, edit the name, hit `Enter`. |
 | `c` | **Copy** file | Press `c`, enter target destination name. |
 | `m` | **Move / Cut** file | Press `m`, enter new directory path. |
-| `y` | Copy file path to clipboard | Press `y` on any file. |
+| `Y` / `y` | Copy path to system clipboard / copy entry inside Neo-tree | Use `Y` to paste the path outside Neovim. |
 | `q` | Close sidebar | Returns focus back to your code. |
 
 ---
 
 ## 3. Fuzzy Finding & Navigation (`telescope.nvim`)
 
-Matching is fzf-fuzzy (letters only need to appear in order, e.g. `wbstyle` → `waybar-style.css`) and case-insensitive (`WaybarStyle` works too).
+File names are matched fuzzily and case-insensitively with the native sorter. Live Grep searches file contents as a ripgrep regex using smart case.
 
 All search commands start with `<leader>f` (files) or `<leader>s` (search):
 
@@ -55,7 +55,7 @@ All search commands start with `<leader>f` (files) or `<leader>s` (search):
 - Open file: `Enter`.
 - Open in horizontal split: `Ctrl+x`.
 - Open in vertical split: `Ctrl+v`.
-- Cancel / Exit: `Esc`.
+- Close from Insert mode: `Ctrl+c`. From Normal mode: `Esc`.
 
 ---
 
@@ -65,7 +65,7 @@ The completion menu appears automatically as you type code.
 
 | Key | Action |
 | :--- | :--- |
-| `Enter` or `<C-y>` | Accept the highlighted suggestion. |
+| `Enter` / `<C-y>` | Accept the selected completion / accept the selected or first completion. |
 | `<C-n>` / `<C-p>` | Move down / up in the suggestion list. |
 | `<Tab>` | Accept the selected suggestion — or the **first** one when none is selected. Inside a snippet: jump forward to the next parameter instead (accepts only a manually selected item). |
 | `<S-Tab>` | Jump backward inside snippet parameters. |
@@ -79,11 +79,11 @@ The completion menu appears automatically as you type code.
 | :--- | :--- | :--- | :--- |
 | `gd` | **Go to Definition** | `F12` | Put cursor on `MyClass()` and hit `gd` to jump to its source. |
 | `gr` | **Find References** | `Shift+F12` | Hit `gr` to open a Telescope list of every place this variable is used. |
-| `K` | **Hover Documentation** | Mouse hover | Shows docstring, parameter types, and function signature. |
+| `K` / `gK` | **Hover / Signature Help** (Normal mode) | | Inspect a symbol or a function call. |
 | `<C-k>` | **Signature Help** (insert mode) | `Ctrl+Shift+Space` | Shows the overloads/docs of the function being called on demand; the window is capped at 12×70 so it does not cover the code. No auto-popup while typing. |
 | `<leader>cr` | **Rename Symbol** | `F2` | Press `Space c r`, type the new variable name, and it updates across files. |
 | `<leader>ca` | **Code Actions / Quick Fix** | `Ctrl+.` | Fix imports, auto-apply linter fixes. |
-| `<leader>cf` | **Format Code** | `Shift+Alt+F` | Formats current file with Prettier, Black, Clang-format, etc. |
+| `<leader>cf` | **Format Code** | `Shift+Alt+F` | C++ uses clangd formatting. |
 | `]d` / `[d` | **Next / Previous Warning** | `F8` | Cycle directly to the next syntax error or warning. |
 
 ---
@@ -95,7 +95,7 @@ The completion menu appears automatically as you type code.
 | `<leader>xx` | Toggle the Problems / Diagnostics list (whole project). |
 | `<leader>xX` | Toggle diagnostics for the current file only. |
 | `<leader>cs` | Document symbols outline (see classes and functions in current file). |
-| `<leader>xL` | Location list / Quickfix list. |
+| `<leader>xL` / `<leader>xQ` | Location list / Quickfix list. |
 | `q` | Close the Trouble panel. |
 
 ---
@@ -106,13 +106,13 @@ The completion menu appears automatically as you type code.
 | :--- | :--- | :--- |
 | `<C-\>` or ``<C-`>`` | Normal / Insert | Toggle terminal drawer at bottom (size 15 lines). |
 | `<C-\>` or ``<C-`>`` | Terminal mode | Hide terminal (process keeps running in background). |
-| `<C-\><C-n>` | Terminal mode | Switch to Neovim Normal mode inside terminal (allows scrolling, selecting, copying output). |
+| `<C-\><C-n>` | Plain terminal / CP runner | Leave Terminal mode. In ToggleTerm, `<C-\>` alone toggles the drawer. |
 
 ---
 
 ## 8. Git Gutters & Diff (`gitsigns.nvim`)
 
-Gutter indicators: green bars = added lines, blue bars = modified lines, red triangles = deleted lines.
+Gutter marks show added, changed, and deleted lines; their colors follow the wallpaper palette.
 
 | Keybind | Action | Example |
 | :--- | :--- | :--- |
@@ -120,22 +120,41 @@ Gutter indicators: green bars = added lines, blue bars = modified lines, red tri
 | `<leader>ghp` | Preview hunk diff inline. | View what was deleted/changed without opening git diff. |
 | `<leader>ghs` | Stage current hunk. | Stage just these few lines for commit. |
 | `<leader>ghr` | Reset / undo current hunk. | Revert edits on the current block back to git HEAD. |
-| `<leader>gb` | Git Blame line. | See who committed this line and when. |
+| `<leader>ghb` / `<leader>gb` | Gitsigns line blame / line history picker. | See who changed a line. |
 
 ---
 
-## 9. C++ Compile & Run (`<leader>rr`)
+## 9. Competitive programming
 
-| Keybind | Action | Example |
-| :--- | :--- | :--- |
-| `<leader>rr` | **Save, compile (`g++ -O2 -std=c++17`), run in bottom split** | Press `Space r r` on `sol.cpp` → binary `/tmp/cp_sol`, output in split terminal. |
+Launch Neovim inside `~/Github/CompetitiveProgramming` and click Competitive Companion.
+New files open in Insert mode below the comment: type `cp` or `cpt`, then accept the snippet with `Tab`.
+`cp` calls `solve()` once; `cpt` reads a test count. Use `i64` for 64-bit integers and `MOD` for the default modulus.
 
-Drop an `input.txt` next to your `.cpp` → auto-fed via `< input.txt`.
+| Key | Action |
+| --- | --- |
+| `<leader>ct` | Compile with GNU C++20 and run all imported samples. |
+| `<leader>cp` | Open or focus the Pretest panel. `Enter` runs the selected case; `q` closes it. |
+| `<leader>rr` | Compile with GNU C++20 and run with `input.txt` beside the `.cpp`, or terminal input. The program gets 5 seconds. |
+| `:vsplit %:p:h/input.txt` | Open or create the input file beside the current solution. |
+| `:CPListen` | Check or restart the Companion listener. |
+
+Pretest supports non-interactive stdin/stdout judging. Local C++/Python sample runs and manual C++ runs have a 1 GiB address-space ceiling; that is not the judge’s RSS limit.
+Move or rename CP solutions with `:Pretest move` or `:Pretest rename` so their path-keyed tests follow them.
 ---
 
-## 11. Snippets (VS Code-style, `LuaSnip`)
----
-## 12. Split Windows & Buffer Tabs
+## 10. Editing with mini.surround
+
+| Key | Example |
+| --- | --- |
+| `gsaiw)` | Wrap the word under the cursor in parentheses. |
+| `gsr"'` | Change surrounding double quotes to single quotes. |
+| `gsd)` | Delete the surrounding parentheses, keeping the contents. |
+| `gsf)` / `gsF)` | Jump to the surrounding parenthesis on the right / left. |
+
+`Ctrl+[` exits Insert mode without reaching for Esc. On a C++ line ending in `{`, `o` opens an indented line below; `O` on `}` opens a line above it.
+`yy` and Visual `y` copy to the system clipboard; `d` and `c` leave it alone. `"+p` reads the system clipboard explicitly.
+
+## 11. Split windows and buffers
 
 - **Tab Bar (top of screen):**
   - `<S-h>` or `[b`: Switch to previous file tab.
@@ -147,8 +166,8 @@ Drop an `input.txt` next to your `.cpp` → auto-fed via `< input.txt`.
   - `Ctrl+k`: Focus top window.
   - `Ctrl+l`: Focus right window.
 - **Split Management:**
-  - `<leader>w-` or `Ctrl+w s`: Split horizontally.
-  - `<leader>w|` or `Ctrl+w v`: Split vertically.
+  - `<leader>-` or `Ctrl+w s`: Split horizontally.
+  - `<leader>|` or `Ctrl+w v`: Split vertically.
   - `<leader>wd` or `Ctrl+w c`: Close split window (on the last window it just shows `E444: Cannot close last window` — it never quits nvim).
   - `Ctrl+w o`: Close all other split windows, keep only the current one.
   - `<leader>bd`: Close the file/buffer in the current window while keeping the window layout (`<leader>bo` closes all other buffers).
@@ -157,7 +176,7 @@ Drop an `input.txt` next to your `.cpp` → auto-fed via `< input.txt`.
 
 ---
 
-## 13. Zoom (the font is the terminal's job)
+## 12. Zoom (the font is the terminal's job)
 
 Neovim is a TUI — it cannot resize its own font, so kitty does it:
 
